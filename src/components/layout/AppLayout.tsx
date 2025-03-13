@@ -10,8 +10,11 @@ const AppLayout = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -21,9 +24,9 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="min-h-screen pb-16 bg-gray-50">
-      <div className="max-w-md mx-auto bg-white min-h-screen relative">
-        <main className="p-4">
+    <div className="min-h-screen pb-16 bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="max-w-md mx-auto bg-white min-h-screen relative shadow-sm">
+        <main className="p-4 sm:p-6">
           <Outlet />
         </main>
         <BottomNavigation />
