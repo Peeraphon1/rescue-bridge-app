@@ -18,6 +18,9 @@ import RequestHelp from "./pages/victim/RequestHelp";
 import AppLayout from "./components/layout/AppLayout";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 
+// Team pages
+import TeamsPage from "./pages/teams/TeamsPage";
+
 // Handle 404
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +50,7 @@ const App = () => (
               <Route path="requests" element={<div>My Requests</div>} />
               <Route path="requests/:id" element={<div>Request Detail</div>} />
               <Route path="request-list" element={<div>Request List</div>} />
+              <Route path="teams" element={<TeamsPage />} />
               <Route path="manage-teams" element={<div>Manage Teams</div>} />
               <Route path="teams/:id" element={<div>Team Detail</div>} />
               <Route path="team-members" element={<div>Team Members</div>} />

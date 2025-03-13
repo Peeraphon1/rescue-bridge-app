@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, ClipboardList, Map, User, Bell } from "lucide-react";
+import { Home, ClipboardList, Map, User, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +39,7 @@ const BottomNavigation = () => {
     if (user.role === 'organization' || user.role === 'rescuer') {
       baseItems.splice(2, 0, {
         label: "Teams",
-        icon: Bell,
+        icon: Users,
         path: "/teams",
       });
     }
