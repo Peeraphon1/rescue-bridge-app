@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/hooks/use-toast";
 import OtpVerification from "@/components/auth/OtpVerification";
 
 const Login = () => {

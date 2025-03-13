@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/hooks/use-toast";
 
 const OtpVerification = ({ onSuccess }: { onSuccess: () => void }) => {
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -23,7 +22,6 @@ const OtpVerification = ({ onSuccess }: { onSuccess: () => void }) => {
     newOtp[index] = value;
     setOtp(newOtp);
     
-    // Auto-advance to next input
     if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
