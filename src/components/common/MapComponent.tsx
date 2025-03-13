@@ -1,6 +1,25 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { MapPinIcon } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix for default marker icons in Leaflet
+import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+
+// Delete default icon
+delete L.Icon.Default.prototype._getIconUrl;
+
+// Set default icon
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl,
+  iconUrl,
+  shadowUrl,
+});
 
 interface MapComponentProps {
   onLocationSelect?: (lat: number, lng: number) => void;
@@ -9,104 +28,68 @@ interface MapComponentProps {
   readOnly?: boolean;
 }
 
+interface LocationMarkerProps {
+  position: [number, number];
+  onLocationSelect?: (lat: number, lng: number) => void;
+  readOnly?: boolean;
+}
+
+// Component to handle map click events and marker positioning
+const LocationMarker: React.FC<LocationMarkerProps> = ({
+  position,
+  onLocationSelect,
+  readOnly,
+}) => {
+  const [markerPosition, setMarkerPosition] = useState<[number, number]>(position);
+
+  useMapEvents({
+    click(e) {
+      if (readOnly) return;
+      const { lat, lng } = e.latlng;
+      setMarkerPosition([lat, lng]);
+      if (onLocationSelect) {
+        onLocationSelect(lat, lng);
+        toast({
+          title: "Location selected",
+          description: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
+        });
+      }
+    },
+  });
+
+  return <Marker position={markerPosition} />;
+};
+
 const MapComponent: React.FC<MapComponentProps> = ({
   onLocationSelect,
   initialLat = 13.7563,
   initialLng = 100.5018,
-  readOnly = false
+  readOnly = false,
 }) => {
-  const [apiKeyEntered, setApiKeyEntered] = useState<boolean>(false);
-  const [mapApiKey, setMapApiKey] = useState<string>("");
-
-  const handleMapClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (readOnly) return;
-    
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    const lat = initialLat + (y - rect.height / 2) / 1000;
-    const lng = initialLng + (x - rect.width / 2) / 1000;
-    
-    if (onLocationSelect) {
-      onLocationSelect(lat, lng);
-      toast({
-        title: "Location selected",
-        description: `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`,
-      });
-    }
-  };
-
-  const handleSubmitApiKey = () => {
-    if (mapApiKey.trim()) {
-      setApiKeyEntered(true);
-      toast({
-        title: "Map API Key Set",
-        description: "Map functionality is now enabled",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Please enter a valid API key",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (!apiKeyEntered) {
-    return (
-      <div className="rounded-lg overflow-hidden bg-gray-100 p-4 mb-4">
-        <p className="text-sm text-gray-600 mb-2">
-          To use the map feature, please enter your map API key:
-        </p>
-        <input
-          type="text"
-          value={mapApiKey}
-          onChange={(e) => setMapApiKey(e.target.value)}
-          placeholder="Enter map API key"
-          className="w-full px-3 py-2 border rounded mb-2"
-        />
-        <button
-          onClick={handleSubmitApiKey}
-          className="w-full bg-primary text-white py-2 rounded"
-        >
-          Submit
-        </button>
-        <p className="text-xs text-gray-500 mt-2">
-          For this demo, any text will work as an API key.
-        </p>
-      </div>
-    );
-  }
+  const position: [number, number] = [initialLat, initialLng];
 
   return (
-    <div 
-      className="h-64 bg-blue-50 rounded-lg relative overflow-hidden"
-      onClick={handleMapClick}
-    >
-      <div className="absolute inset-0 bg-blue-50">
-        <div className="absolute inset-0 grid grid-cols-4 grid-rows-4">
-          {Array(16)
-            .fill(0)
-            .map((_, i) => (
-              <div key={i} className="border border-blue-100" />
-            ))}
-        </div>
-
-        <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-300 transform -translate-y-1/2"></div>
-        <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-gray-300 transform -translate-x-1/2"></div>
-        
-        {readOnly && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-pulse">
-              <MapPinIcon className="h-4 w-4 text-white" />
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="h-64 rounded-lg overflow-hidden relative">
+      <MapContainer
+        center={position}
+        zoom={13}
+        scrollWheelZoom={false}
+        style={{ height: "100%", width: "100%" }}
+        className="z-0"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <LocationMarker
+          position={position}
+          onLocationSelect={onLocationSelect}
+          readOnly={readOnly}
+        />
+      </MapContainer>
       
       {!readOnly && (
-        <div className="absolute bottom-4 left-0 right-0 text-center text-sm text-gray-600 bg-white/80 py-1">
+        <div className="absolute bottom-4 left-0 right-0 text-center text-sm text-gray-100 bg-black/50 py-1 z-10 pointer-events-none">
           Click to set location
         </div>
       )}
