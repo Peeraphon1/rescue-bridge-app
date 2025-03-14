@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/common/StatusBadge";
 import { MapPin, ArrowLeft, Clock, CheckCircle, UserCircle, HomeIcon, Phone } from "lucide-react";
-import { HelpRequest } from "@/types";
+import { HelpRequest, MissionStatus } from "@/types";
 
 const RequestDetail = () => {
   const { id } = useParams();
@@ -34,7 +33,7 @@ const RequestDetail = () => {
     images: ["/lovable-uploads/752a656b-91d7-4948-ad7b-684230379824.png"]
   };
 
-  // Mock rescue team data
+  // Mock rescue team data with properly typed status
   const rescueTeam = {
     id: "team-A",
     name: "Team Alpha",
@@ -45,7 +44,7 @@ const RequestDetail = () => {
     members: 3,
     estimatedArrival: "2023-06-29T14:30:00Z",
     currentLocation: "2 km away",
-    status: "on_way" as const,
+    status: "on_way" as MissionStatus,
   };
 
   const getProgressValue = (status: string) => {
@@ -63,8 +62,17 @@ const RequestDetail = () => {
   // Timeline steps based on request status
   const timelineSteps = [
     { label: "รับคำขอแล้ว", active: true, date: new Date(request.createdAt) },
-    { label: "ทีมช่วยเหลือกำลังมาหา", active: rescueTeam.status === "on_way", date: rescueTeam.status === "on_way" ? new Date(Date.now() - 3600000) : null },
-    { label: "ถึงที่หมายแล้ว", active: rescueTeam.status === "arrived", date: null },
+    { 
+      label: "ทีมช่วยเหลือกำลังมาหา", 
+      active: rescueTeam.status === "on_way" || rescueTeam.status === "arrived" || rescueTeam.status === "completed", 
+      date: (rescueTeam.status === "on_way" || rescueTeam.status === "arrived" || rescueTeam.status === "completed") ? 
+        new Date(Date.now() - 3600000) : null 
+    },
+    { 
+      label: "ถึงที่หมายแล้ว", 
+      active: rescueTeam.status === "arrived" || rescueTeam.status === "completed", 
+      date: null 
+    },
   ];
 
   return (
