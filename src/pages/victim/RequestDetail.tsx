@@ -1,95 +1,79 @@
 
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StatusBadge from "@/components/common/StatusBadge";
-import { MapPin, ArrowLeft, Clock, CheckCircle, UserCircle, HomeIcon, Phone, Search } from "lucide-react";
-import { HelpRequest, MissionStatus, RequestStatus } from "@/types";
+import { MapPin, ArrowLeft, Search, UserCircle } from "lucide-react";
+import { HelpRequest } from "@/types";
 
 const RequestDetail = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"pending" | "inProgress" | "completed">("inProgress");
   
-  // Mock data for the request
-  const request: HelpRequest = {
-    id: id || "REQ-001",
-    userId: "user-123",
-    location: {
-      lat: 13.756331,
-      lng: 100.501762,
-      address: "123 Flood St, Bangkok 10330",
-    },
-    needs: {
-      food: true,
-      water: true,
-      medicine: true,
-      other: false,
-    },
-    peopleCount: 4,
-    details: "We need urgent help. Water is rising. We have elderly people and children.",
-    status: "in_progress",
-    createdAt: "2023-06-28T10:30:00Z",
-    images: ["/lovable-uploads/752a656b-91d7-4948-ad7b-684230379824.png"]
-  };
-
-  // Mock rescue team data with properly typed status
-  const rescueTeam = {
-    id: "team-A",
-    name: "Team Alpha",
-    leader: {
-      name: "John Smith",
-      phone: "+66 81-234-5678"
-    },
-    members: 3,
-    estimatedArrival: "2023-06-29T14:30:00Z",
-    currentLocation: "2 km away",
-    status: "on_way" as MissionStatus,
-  };
-
-  // Mock list of requests
+  // Mock data for the requests
   const requests: HelpRequest[] = [
-    { ...request, id: "REQ-001", status: "pending" },
-    { ...request, id: "REQ-002", status: "in_progress" },
-    { ...request, id: "REQ-003", status: "completed" },
-  ];
-
-  const getProgressValue = (status: string) => {
-    switch (status) {
-      case "pending": return 0;
-      case "reserved": return 25;
-      case "in_progress": return 50;
-      case "on_way": return 75;
-      case "arrived": return 90;
-      case "completed": return 100;
-      default: return 0;
-    }
-  };
-
-  // Timeline steps based on request status
-  const timelineSteps = [
-    { label: "รับคำขอแล้ว", active: true, date: new Date(request.createdAt) },
-    { 
-      label: "ทีมช่วยเหลือกำลังมาหา", 
-      active: rescueTeam.status === "on_way" || rescueTeam.status === "arrived" || rescueTeam.status === "completed", 
-      date: (rescueTeam.status === "on_way" || rescueTeam.status === "arrived" || rescueTeam.status === "completed") ? 
-        new Date(Date.now() - 3600000) : null 
+    {
+      id: "REQ-001",
+      userId: "user-123",
+      location: {
+        lat: 13.756331,
+        lng: 100.501762,
+        address: "123 Flood St, Bangkok 10330",
+      },
+      needs: {
+        food: true,
+        water: true,
+        medicine: true,
+        other: false,
+      },
+      peopleCount: 4,
+      details: "We need urgent help. Water is rising. We have elderly people and children.",
+      status: "pending",
+      createdAt: "2023-06-28T10:30:00Z",
+      images: ["/lovable-uploads/752a656b-91d7-4948-ad7b-684230379824.png"]
     },
-    { 
-      label: "ถึงที่หมายแล้ว", 
-      active: rescueTeam.status === "arrived" || rescueTeam.status === "completed", 
-      date: null 
+    {
+      id: "REQ-002",
+      userId: "user-123",
+      location: {
+        lat: 13.756331,
+        lng: 100.501762,
+        address: "456 River Rd, Bangkok 10330",
+      },
+      needs: {
+        food: true,
+        water: true,
+        medicine: false,
+        other: false,
+      },
+      peopleCount: 2,
+      details: "Need water and food supplies. Area is flooded.",
+      status: "in_progress",
+      createdAt: "2023-06-29T14:20:00Z",
+      images: []
+    },
+    {
+      id: "REQ-003",
+      userId: "user-123",
+      location: {
+        lat: 13.756331,
+        lng: 100.501762,
+        address: "789 Rescue Ave, Bangkok 10330",
+      },
+      needs: {
+        food: false,
+        water: true,
+        medicine: true,
+        other: false,
+      },
+      peopleCount: 1,
+      details: "Need medical assistance and water.",
+      status: "completed",
+      createdAt: "2023-06-20T09:15:00Z",
+      images: []
     },
   ];
-
-  const filteredRequests = requests.filter(req => {
-    if (activeTab === "pending") return req.status === "pending";
-    if (activeTab === "inProgress") return req.status === "in_progress" || req.status === "reserved";
-    if (activeTab === "completed") return req.status === "completed";
-    return true;
-  });
 
   const renderRequestCard = (request: HelpRequest) => (
     <Card key={request.id} className="mb-4 border-0 shadow-sm hover:shadow-md transition-all">
@@ -99,7 +83,7 @@ const RequestDetail = () => {
             <div className="bg-gray-100 rounded-full p-2 mr-3">
               <UserCircle className="h-5 w-5 text-gray-500" />
             </div>
-            <span className="text-sm font-medium">คุณ</span>
+            <span className="text-sm font-medium">คำขอช่วยเหลือ #{request.id}</span>
           </div>
           <StatusBadge 
             status={request.status} 
@@ -108,7 +92,14 @@ const RequestDetail = () => {
         </div>
 
         <div className="mb-3">
-          <p className="text-sm font-medium mb-1">ต้องการ: น้ำท่วมบ้าน,น้ำ,อาหาร</p>
+          <p className="text-sm font-medium mb-1">
+            ต้องการ: {[
+              request.needs.food ? "อาหาร" : "",
+              request.needs.water ? "น้ำ" : "",
+              request.needs.medicine ? "ยา" : "",
+              request.needs.other ? "อื่นๆ" : ""
+            ].filter(Boolean).join(", ")}
+          </p>
           <p className="text-xs text-gray-600">{request.details}</p>
         </div>
 
@@ -117,9 +108,13 @@ const RequestDetail = () => {
           <span>{request.location.address}</span>
         </div>
 
+        <div className="text-xs text-gray-500 mb-3">
+          สร้างเมื่อ: {new Date(request.createdAt).toLocaleString('th-TH')}
+        </div>
+
         {request.status === "in_progress" && (
           <div className="border-t pt-3 mt-2">
-            <p className="text-sm font-medium text-yellow-600">ทีมช่วยเหลือกำลังเดินทางมาหาคุณ</p>
+            <p className="text-sm font-medium text-blue-600">ทีมช่วยเหลือกำลังเดินทางมาหาคุณ</p>
           </div>
         )}
         
@@ -128,6 +123,14 @@ const RequestDetail = () => {
             <p className="text-sm font-medium text-green-600">ภารกิจช่วยเหลือเสร็จสิ้นแล้ว</p>
           </div>
         )}
+
+        <Button
+          className="w-full mt-3 text-primary border border-primary bg-white hover:bg-primary/10"
+          variant="outline"
+          onClick={() => navigate(`/requests/${request.id}`)}
+        >
+          ดูรายละเอียด
+        </Button>
       </CardContent>
     </Card>
   );
@@ -137,7 +140,8 @@ const RequestDetail = () => {
       <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
         <img src="/lovable-uploads/b4e3e3c9-5fe6-4c31-b1f9-f078a8165758.png" alt="No requests" className="w-16 h-16 object-contain" />
       </div>
-      <p className="text-lg font-medium">ยังไม่มีการแจ้ง</p>
+      <p className="text-lg font-medium">ยังไม่มีคำขอช่วยเหลือ</p>
+      <p className="text-sm text-gray-500">หากคุณต้องการความช่วยเหลือ กรุณาสร้างคำขอใหม่</p>
     </div>
   );
 
@@ -152,44 +156,46 @@ const RequestDetail = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-semibold flex-1">คำขอของฉัน</h1>
+        <h1 className="text-lg font-semibold flex-1">คำขอช่วยเหลือของฉัน</h1>
         <Button variant="ghost" size="icon">
           <Search className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b">
-        <button
-          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "pending" ? "text-primary" : "text-gray-500"}`}
-          onClick={() => setActiveTab("pending")}
-        >
-          กำลังดำเนินการ
-          {activeTab === "pending" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
-        </button>
-        <button
-          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "inProgress" ? "text-primary" : "text-gray-500"}`}
-          onClick={() => setActiveTab("inProgress")}
-        >
-          สำเร็จ
-          {activeTab === "inProgress" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
-        </button>
-        <button
-          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "completed" ? "text-primary" : "text-gray-500"}`}
-          onClick={() => setActiveTab("completed")}
-        >
-          ยกเลิก
-          {activeTab === "completed" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
-        </button>
-      </div>
-
-      <div className="p-4">
-        {filteredRequests.length > 0 ? (
-          filteredRequests.map(renderRequestCard)
-        ) : (
-          renderEmptyState()
-        )}
-      </div>
+      <Tabs defaultValue="inProgress" className="w-full">
+        <TabsList className="w-full grid grid-cols-3 border-b rounded-none bg-white">
+          <TabsTrigger value="pending" className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+            รอดำเนินการ
+          </TabsTrigger>
+          <TabsTrigger value="inProgress" className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+            กำลังดำเนินการ
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+            เสร็จสิ้น
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="pending" className="p-4">
+          {requests.filter(req => req.status === "pending").length > 0 ? 
+            requests.filter(req => req.status === "pending").map(renderRequestCard) : 
+            renderEmptyState()
+          }
+        </TabsContent>
+        
+        <TabsContent value="inProgress" className="p-4">
+          {requests.filter(req => req.status === "in_progress" || req.status === "reserved").length > 0 ? 
+            requests.filter(req => req.status === "in_progress" || req.status === "reserved").map(renderRequestCard) : 
+            renderEmptyState()
+          }
+        </TabsContent>
+        
+        <TabsContent value="completed" className="p-4">
+          {requests.filter(req => req.status === "completed").length > 0 ? 
+            requests.filter(req => req.status === "completed").map(renderRequestCard) : 
+            renderEmptyState()
+          }
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
