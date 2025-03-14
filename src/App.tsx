@@ -13,6 +13,7 @@ import Register from "./pages/auth/Register";
 import OrganizationRegistrationForm from "./pages/organization/RegistrationForm";
 import OrganizationRegistrationPending from "./pages/organization/RegistrationPending";
 import RequestHelp from "./pages/victim/RequestHelp";
+import RequestDetail from "./pages/victim/RequestDetail";
 
 // Layout
 import AppLayout from "./components/layout/AppLayout";
@@ -55,7 +56,7 @@ const App = () => (
               <Route path="dashboard" element={<DashboardRouter />} />
               <Route path="request-help" element={<RequestHelp />} />
               <Route path="requests" element={<div>My Requests</div>} />
-              <Route path="requests/:id" element={<div>Request Detail</div>} />
+              <Route path="requests/:id" element={<RequestDetail />} />
               <Route path="request-list" element={<div>Request List</div>} />
               <Route path="teams" element={<TeamsPage />} />
               <Route path="manage-teams" element={<div>Manage Teams</div>} />
