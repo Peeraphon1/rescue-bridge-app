@@ -1,15 +1,17 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/common/StatusBadge";
-import { MapPin, ArrowLeft, Clock, CheckCircle, UserCircle, HomeIcon, Phone } from "lucide-react";
-import { HelpRequest, MissionStatus } from "@/types";
+import { MapPin, ArrowLeft, Clock, CheckCircle, UserCircle, HomeIcon, Phone, Search } from "lucide-react";
+import { HelpRequest, MissionStatus, RequestStatus } from "@/types";
 
 const RequestDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"pending" | "inProgress" | "completed">("inProgress");
   
   // Mock data for the request
   const request: HelpRequest = {
@@ -47,6 +49,13 @@ const RequestDetail = () => {
     status: "on_way" as MissionStatus,
   };
 
+  // Mock list of requests
+  const requests: HelpRequest[] = [
+    { ...request, id: "REQ-001", status: "pending" },
+    { ...request, id: "REQ-002", status: "in_progress" },
+    { ...request, id: "REQ-003", status: "completed" },
+  ];
+
   const getProgressValue = (status: string) => {
     switch (status) {
       case "pending": return 0;
@@ -75,6 +84,63 @@ const RequestDetail = () => {
     },
   ];
 
+  const filteredRequests = requests.filter(req => {
+    if (activeTab === "pending") return req.status === "pending";
+    if (activeTab === "inProgress") return req.status === "in_progress" || req.status === "reserved";
+    if (activeTab === "completed") return req.status === "completed";
+    return true;
+  });
+
+  const renderRequestCard = (request: HelpRequest) => (
+    <Card key={request.id} className="mb-4 border-0 shadow-sm hover:shadow-md transition-all">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex items-center">
+            <div className="bg-gray-100 rounded-full p-2 mr-3">
+              <UserCircle className="h-5 w-5 text-gray-500" />
+            </div>
+            <span className="text-sm font-medium">คุณ</span>
+          </div>
+          <StatusBadge 
+            status={request.status} 
+            className={request.status === "completed" ? "bg-green-100" : request.status === "in_progress" ? "bg-blue-100" : ""}
+          />
+        </div>
+
+        <div className="mb-3">
+          <p className="text-sm font-medium mb-1">ต้องการ: น้ำท่วมบ้าน,น้ำ,อาหาร</p>
+          <p className="text-xs text-gray-600">{request.details}</p>
+        </div>
+
+        <div className="flex items-center text-xs text-gray-600 mb-3">
+          <MapPin className="h-3 w-3 mr-1" />
+          <span>{request.location.address}</span>
+        </div>
+
+        {request.status === "in_progress" && (
+          <div className="border-t pt-3 mt-2">
+            <p className="text-sm font-medium text-yellow-600">ทีมช่วยเหลือกำลังเดินทางมาหาคุณ</p>
+          </div>
+        )}
+        
+        {request.status === "completed" && (
+          <div className="border-t pt-3 mt-2">
+            <p className="text-sm font-medium text-green-600">ภารกิจช่วยเหลือเสร็จสิ้นแล้ว</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderEmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-10">
+      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <img src="/lovable-uploads/b4e3e3c9-5fe6-4c31-b1f9-f078a8165758.png" alt="No requests" className="w-16 h-16 object-contain" />
+      </div>
+      <p className="text-lg font-medium">ยังไม่มีการแจ้ง</p>
+    </div>
+  );
+
   return (
     <div className="pb-16">
       <div className="bg-white p-4 flex items-center sticky top-0 z-10 border-b">
@@ -86,158 +152,43 @@ const RequestDetail = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-semibold">คำขอที่กำลังดำเนินการ</h1>
+        <h1 className="text-lg font-semibold flex-1">คำขอของฉัน</h1>
+        <Button variant="ghost" size="icon">
+          <Search className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b">
+        <button
+          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "pending" ? "text-primary" : "text-gray-500"}`}
+          onClick={() => setActiveTab("pending")}
+        >
+          กำลังดำเนินการ
+          {activeTab === "pending" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
+        </button>
+        <button
+          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "inProgress" ? "text-primary" : "text-gray-500"}`}
+          onClick={() => setActiveTab("inProgress")}
+        >
+          สำเร็จ
+          {activeTab === "inProgress" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
+        </button>
+        <button
+          className={`flex-1 py-3 text-sm font-medium relative ${activeTab === "completed" ? "text-primary" : "text-gray-500"}`}
+          onClick={() => setActiveTab("completed")}
+        >
+          ยกเลิก
+          {activeTab === "completed" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></div>}
+        </button>
       </div>
 
       <div className="p-4">
-        {/* Progress Tracker */}
-        <Card className="mb-4 border-0 shadow-sm">
-          <CardContent className="p-5">
-            <div className="mb-4">
-              <Progress value={getProgressValue(rescueTeam.status)} className="h-2" />
-            </div>
-            <div className="flex justify-between text-xs mt-1">
-              {timelineSteps.map((step, index) => (
-                <div key={index} className={`text-center ${step.active ? 'text-primary font-medium' : 'text-gray-400'}`}>
-                  <div className={`w-4 h-4 rounded-full mx-auto mb-1 flex items-center justify-center ${step.active ? 'bg-primary' : 'bg-gray-200'}`}>
-                    {step.active && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                  </div>
-                  {step.label}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Rescue Team Info */}
-        <Card className="mb-4 border-0 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-start mb-4">
-              <div className="bg-primary/10 p-3 rounded-full mr-3">
-                <UserCircle className="text-primary h-6 w-6" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">ศูนย์ช่วยเหลือด้านอาหารและน้ำดื่ม {rescueTeam.id}</h3>
-                <p className="text-sm text-gray-500 mt-1">ทีมกำลังเดินทางมาหาคุณ</p>
-              </div>
-            </div>
-
-            <div className="rounded-lg border p-4 mb-4">
-              <div className="mb-4">
-                <p className="font-medium text-sm mb-1">คาดว่าจะถึงที่หมายภายใน</p>
-                <p className="text-xs text-gray-600">ประมาณ {new Date(rescueTeam.estimatedArrival).toLocaleTimeString()} น.</p>
-                <p className="text-xs text-gray-600">วันที่ {new Date(rescueTeam.estimatedArrival).toLocaleDateString()}</p>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden mr-2">
-                    <UserCircle className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Leader</p>
-                    <p className="text-xs text-gray-600">{rescueTeam.leader.name}</p>
-                  </div>
-                </div>
-                <Button size="sm" variant="outline" className="text-xs h-8 rounded-full">
-                  <Phone className="h-3 w-3 mr-1" />
-                  ติดต่อ
-                </Button>
-              </div>
-            </div>
-
-            {/* Timeline */}
-            <div className="relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-0.5 before:bg-gray-200">
-              <div className="mb-6 relative">
-                <div className="absolute left-[-24px] top-0 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-                <p className="text-sm font-medium">ศูนย์ช่วยเหลือรับคำขอของคุณแล้ว</p>
-                <p className="text-xs text-gray-500">{new Date(request.createdAt).toLocaleString()}</p>
-              </div>
-              
-              <div className="mb-6 relative">
-                <div className="absolute left-[-24px] top-0 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-                <p className="text-sm font-medium">ทีมช่วยเหลือกำลังมาหาคุณ</p>
-                <p className="text-xs text-gray-500">{new Date(Date.now() - 3600000).toLocaleString()}</p>
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-[-24px] top-0 w-4 h-4 rounded-full bg-gray-200"></div>
-                <p className="text-sm font-medium text-gray-400">รอทีมช่วยเหลือมาถึง</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Request Details */}
-        <Card className="mb-4 border-0 shadow-sm">
-          <CardContent className="p-5">
-            <h3 className="font-semibold mb-4">รายละเอียดคำขอ</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <MapPin className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">ที่อยู่:</p>
-                  <p className="text-sm text-gray-600">{request.location.address}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <HomeIcon className="h-5 w-5 text-gray-500 mr-2 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">จำนวนคน: {request.peopleCount} คน</p>
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium mb-2">สิ่งที่ต้องการ:</p>
-                <div className="flex flex-wrap gap-2">
-                  {request.needs.food && (
-                    <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full">อาหาร</span>
-                  )}
-                  {request.needs.water && (
-                    <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full">น้ำดื่ม</span>
-                  )}
-                  {request.needs.medicine && (
-                    <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full">ยา</span>
-                  )}
-                  {request.needs.other && (
-                    <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full">อื่นๆ</span>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium mb-2">รายละเอียดเพิ่มเติม:</p>
-                <p className="text-sm text-gray-600">{request.details}</p>
-              </div>
-              
-              {request.images && request.images.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">รูปภาพ:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {request.images.map((image, index) => (
-                      <div 
-                        key={index} 
-                        className="aspect-square rounded-lg overflow-hidden bg-gray-100"
-                      >
-                        <img 
-                          src={image} 
-                          alt={`Request image ${index + 1}`} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {filteredRequests.length > 0 ? (
+          filteredRequests.map(renderRequestCard)
+        ) : (
+          renderEmptyState()
+        )}
       </div>
     </div>
   );
