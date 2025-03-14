@@ -94,6 +94,13 @@ const OrganizationDashboard = () => {
                     )}
                   </div>
                 </div>
+                <Button 
+                  variant="link" 
+                  className="text-blue-500 p-0 h-auto text-sm"
+                  onClick={() => navigate(`/organization/zones/${request.id}/requests`)}
+                >
+                  [ View Details ]
+                </Button>
               </div>
             ))}
           </CardContent>

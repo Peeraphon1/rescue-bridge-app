@@ -24,6 +24,9 @@ import OrganizationDetails from "./pages/admin/OrganizationDetails";
 // Team pages
 import TeamsPage from "./pages/teams/TeamsPage";
 
+// Organization pages
+import RequestDetailList from "./pages/organization/RequestDetailList";
+
 // Handle 404
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +48,7 @@ const App = () => (
             {/* Organization registration flow */}
             <Route path="/organization/registration" element={<OrganizationRegistrationForm />} />
             <Route path="/organization/pending" element={<OrganizationRegistrationPending />} />
+            <Route path="/organization/zones/:zoneId/requests" element={<RequestDetailList />} />
             
             {/* Protected routes */}
             <Route path="/" element={<AppLayout />}>
