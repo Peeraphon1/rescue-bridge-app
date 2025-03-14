@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, Check, X } from "lucide-react";
+import { Building2, Check, X, Info } from "lucide-react";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -36,7 +36,10 @@ const AdminDashboard = () => {
               <div className="space-y-4">
                 {pendingOrganizations.map((org) => (
                   <div key={org.id} className="border-b pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-start">
+                    <div 
+                      className="flex items-start cursor-pointer" 
+                      onClick={() => navigate(`/admin/organizations/${org.id}/details`)}
+                    >
                       <Building2 className="w-5 h-5 text-blue-500 mr-2 mt-0.5" />
                       <div className="flex-1">
                         <div className="flex justify-between">
@@ -62,6 +65,13 @@ const AdminDashboard = () => {
                         onClick={() => navigate(`/admin/organizations/${org.id}/reject`)}
                       >
                         <X className="w-4 h-4 mr-1" /> Reject
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-10 p-0 flex-none"
+                        onClick={() => navigate(`/admin/organizations/${org.id}/details`)}
+                      >
+                        <Info className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

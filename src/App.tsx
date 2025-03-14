@@ -18,6 +18,9 @@ import RequestHelp from "./pages/victim/RequestHelp";
 import AppLayout from "./components/layout/AppLayout";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
 
+// Admin pages
+import OrganizationDetails from "./pages/admin/OrganizationDetails";
+
 // Team pages
 import TeamsPage from "./pages/teams/TeamsPage";
 
@@ -61,6 +64,7 @@ const App = () => (
               
               {/* Admin routes */}
               <Route path="admin/organizations" element={<div>All Organizations</div>} />
+              <Route path="admin/organizations/:id/details" element={<OrganizationDetails />} />
               <Route path="admin/organizations/:id/approve" element={<div>Approve Organization</div>} />
               <Route path="admin/organizations/:id/reject" element={<div>Reject Organization</div>} />
               <Route path="admin/statistics" element={<div>Statistics</div>} />
