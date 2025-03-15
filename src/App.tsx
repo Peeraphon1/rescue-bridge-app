@@ -49,7 +49,6 @@ const App = () => (
             {/* Organization registration flow */}
             <Route path="/organization/registration" element={<OrganizationRegistrationForm />} />
             <Route path="/organization/pending" element={<OrganizationRegistrationPending />} />
-            <Route path="/organization/zones/:zoneId/requests" element={<RequestDetailList />} />
             
             {/* Protected routes */}
             <Route path="/" element={<AppLayout />}>
@@ -57,7 +56,7 @@ const App = () => (
               <Route path="request-help" element={<RequestHelp />} />
               <Route path="requests" element={<div>My Requests</div>} />
               <Route path="requests/:id" element={<RequestDetail />} />
-              <Route path="request-list" element={<div>Request List</div>} />
+              <Route path="organization/zones/:zoneId/requests" element={<RequestDetailList />} />
               <Route path="teams" element={<TeamsPage />} />
               <Route path="manage-teams" element={<div>Manage Teams</div>} />
               <Route path="teams/:id" element={<div>Team Detail</div>} />
