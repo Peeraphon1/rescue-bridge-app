@@ -21,12 +21,16 @@ export const signIn = async (email: string, password: string, role: UserRole) =>
       .single();
 
     if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      if (profileError.code === "PGRST116") {
+        throw new Error("User profile not found. Please contact support.");
+      }
       throw profileError;
     }
 
     if (profile.role !== role) {
       await supabase.auth.signOut();
-      throw new Error('Unauthorized role');
+      throw new Error(`This account is not registered as a ${role}. Please use the correct login.`);
     }
 
     return data;
@@ -77,6 +81,10 @@ export const getCurrentUser = async () => {
   try {
     const { data, error } = await supabase.auth.getUser();
     if (error) {
+      if (error.message.includes("Auth session missing")) {
+        console.log("No authenticated user");
+        return null;
+      }
       throw error;
     }
     return data.user;
@@ -98,16 +106,20 @@ export const getCurrentUserProfile = async () => {
       .from('profiles')
       .select('*')
       .eq('id', userData.user.id)
-      .single();
+      .maybeSingle();
     
     if (profileError) {
       throw profileError;
     }
     
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+    
     return profile;
   } catch (error) {
     console.error('Error getting current user profile:', error);
-    return null;
+    throw error;
   }
 };
 

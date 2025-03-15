@@ -13,6 +13,7 @@ type AuthContextType = {
   register: (email: string, password: string, role: UserRole, name: string) => Promise<boolean>;
   logout: () => Promise<void>;
   verifyOtp: (otp: string) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  const fetchProfile = async (currentUser: any) => {
+    if (currentUser) {
+      try {
+        const userProfile = await getCurrentUserProfile();
+        setProfile(userProfile);
+        return userProfile;
+      } catch (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      setIsLoading(true);
+      try {
+        await fetchProfile(user);
+      } catch (error) {
+        console.error("Error refreshing profile:", error);
+        toast.error("Failed to refresh your profile. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   useEffect(() => {
     // Check for current user on mount
     const checkUser = async () => {
@@ -32,12 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(currentUser);
         
         if (currentUser) {
-          try {
-            const userProfile = await getCurrentUserProfile();
-            setProfile(userProfile);
-          } catch (profileError) {
-            console.error("Error fetching user profile:", profileError);
-          }
+          await fetchProfile(currentUser);
         }
       } catch (error) {
         console.error("Error checking user session:", error);
@@ -58,12 +82,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const data = await signIn(email, password, role);
       setUser(data.user);
-      try {
-        const userProfile = await getCurrentUserProfile();
-        setProfile(userProfile);
-      } catch (profileError) {
-        console.error("Error fetching user profile after login:", profileError);
+      const userProfile = await fetchProfile(data.user);
+      
+      if (!userProfile) {
+        toast.error("Could not load your profile. Please try again.");
+        await signOut();
+        setUser(null);
+        setProfile(null);
+        return false;
       }
+      
       return true;
     } catch (error) {
       console.error("Login error:", error);
@@ -121,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register,
         logout,
         verifyOtp,
+        refreshProfile,
       }}
     >
       {children}

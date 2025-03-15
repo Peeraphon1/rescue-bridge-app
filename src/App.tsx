@@ -28,6 +28,11 @@ import TeamsPage from "./pages/teams/TeamsPage";
 // Organization pages
 import RequestDetailList from "./pages/organization/RequestDetailList";
 
+// New pages
+import MapPage from "./pages/map/MapPage";
+import RequestsListPage from "./pages/requests/RequestsListPage";
+import ProfilePage from "./pages/profile/ProfilePage";
+
 // Handle 404
 import NotFound from "./pages/NotFound";
 
@@ -54,7 +59,7 @@ const App = () => (
             <Route path="/" element={<AppLayout />}>
               <Route path="dashboard" element={<DashboardRouter />} />
               <Route path="request-help" element={<RequestHelp />} />
-              <Route path="requests" element={<div>My Requests</div>} />
+              <Route path="requests" element={<RequestsListPage />} />
               <Route path="requests/:id" element={<RequestDetail />} />
               <Route path="organization/zones/:zoneId/requests" element={<RequestDetailList />} />
               <Route path="teams" element={<TeamsPage />} />
@@ -62,8 +67,8 @@ const App = () => (
               <Route path="teams/:id" element={<div>Team Detail</div>} />
               <Route path="team-members" element={<div>Team Members</div>} />
               <Route path="missions/:id" element={<div>Mission Detail</div>} />
-              <Route path="map" element={<div>Map View</div>} />
-              <Route path="profile" element={<div>User Profile</div>} />
+              <Route path="map" element={<MapPage />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="notifications" element={<div>Notifications</div>} />
               
               {/* Admin routes */}

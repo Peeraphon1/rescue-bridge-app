@@ -1,14 +1,24 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import VictimDashboard from "./VictimDashboard";
 import OrganizationDashboard from "./OrganizationDashboard";
 import RescuerDashboard from "./RescuerDashboard";
 import AdminDashboard from "./AdminDashboard";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const DashboardRouter = () => {
-  const { profile, isLoading } = useAuth();
+  const { profile, isLoading, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !profile && user) {
+      toast.error("Could not load your profile. Please try logging in again.");
+    }
+  }, [isLoading, profile, user]);
 
   if (isLoading) {
     return (
@@ -23,8 +33,26 @@ const DashboardRouter = () => {
 
   if (!profile) {
     return (
-      <div className="text-center py-10">
-        <p>Profile information not available. Please try again later.</p>
+      <div className="text-center py-10 px-4">
+        <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Profile Not Available</h2>
+        <p className="text-gray-600 mb-6">
+          We couldn't load your profile information. This might be due to an authentication issue.
+        </p>
+        <div className="flex justify-center gap-3">
+          <Button variant="outline" onClick={() => navigate("/")}>
+            Go Home
+          </Button>
+          <Button 
+            variant="default"
+            onClick={async () => {
+              await logout();
+              navigate("/");
+            }}
+          >
+            Log Out & Try Again
+          </Button>
+        </div>
       </div>
     );
   }

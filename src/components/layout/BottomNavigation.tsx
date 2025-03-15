@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
-  if (!user) return null;
+  if (!profile) return null;
 
   const getNavItems = () => {
     const baseItems = [
@@ -36,7 +36,7 @@ const BottomNavigation = () => {
       },
     ];
 
-    if (user.role === 'organization' || user.role === 'rescuer') {
+    if (profile.role === 'organization' || profile.role === 'rescuer') {
       baseItems.splice(2, 0, {
         label: "Teams",
         icon: Users,
@@ -50,12 +50,12 @@ const BottomNavigation = () => {
   const navItems = getNavItems();
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white border-t h-16 flex items-center justify-around z-50">
+    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t h-16 flex items-center justify-around z-50">
       {navItems.map((item) => (
         <button
           key={item.path}
           className={cn(
-            "bottom-tab",
+            "flex flex-col items-center justify-center w-full h-full text-xs",
             location.pathname === item.path
               ? "text-primary"
               : "text-gray-400"
