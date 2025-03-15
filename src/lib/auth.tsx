@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserRole } from "@/types/supabase";
 import { signIn, signUp, signOut, getCurrentUser, getCurrentUserProfile } from "@/services/authService";
@@ -38,19 +38,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return null;
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       setIsLoading(true);
       try {
-        await fetchProfile(user);
+        const refreshedProfile = await fetchProfile(user);
+        if (refreshedProfile) {
+          console.log("Profile refreshed successfully:", refreshedProfile);
+        } else {
+          console.warn("Could not refresh profile - no profile found");
+        }
+        return refreshedProfile;
       } catch (error) {
         console.error("Error refreshing profile:", error);
         toast.error("Failed to refresh your profile. Please try again.");
+        return null;
       } finally {
         setIsLoading(false);
       }
     }
-  };
+    return null;
+  }, [user]);
 
   useEffect(() => {
     // Check for current user on mount
@@ -107,6 +115,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const data = await signUp(email, password, role, name);
       setUser(data.user);
+      
+      // Attempt to fetch the profile immediately after signup
+      try {
+        const userProfile = await fetchProfile(data.user);
+        if (!userProfile) {
+          console.warn("Profile not created during registration, will try again on next page load");
+        }
+      } catch (profileError) {
+        console.error("Error fetching profile after signup:", profileError);
+      }
+      
       toast.success("Registration successful! Check your email to confirm your account.");
       return true;
     } catch (error) {

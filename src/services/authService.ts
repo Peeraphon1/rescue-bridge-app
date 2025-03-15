@@ -42,6 +42,7 @@ export const signIn = async (email: string, password: string, role: UserRole) =>
 
 export const signUp = async (email: string, password: string, role: UserRole, name: string) => {
   try {
+    // First register the user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -55,6 +56,24 @@ export const signUp = async (email: string, password: string, role: UserRole, na
 
     if (error) {
       throw error;
+    }
+
+    // Manually create a profile for the user
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: email,
+          role: role,
+          name: name,
+        });
+
+      if (profileError) {
+        console.error('Error creating user profile:', profileError);
+        // Even if profile creation fails, we don't want to block the signup
+        // The trigger should handle it, this is just a backup
+      }
     }
 
     return data;
