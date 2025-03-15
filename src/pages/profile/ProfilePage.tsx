@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, LogOut, Mail, Phone, User, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProfilePage = () => {
   const { user, profile, logout, isLoading, refreshProfile } = useAuth();
