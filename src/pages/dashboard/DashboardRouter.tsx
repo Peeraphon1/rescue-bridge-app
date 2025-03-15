@@ -7,11 +7,11 @@ import RescuerDashboard from "./RescuerDashboard";
 import AdminDashboard from "./AdminDashboard";
 
 const DashboardRouter = () => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
-  if (!user) return null;
+  if (!profile) return null;
 
-  switch (user.role) {
+  switch (profile.role) {
     case "victim":
       return <VictimDashboard />;
     case "organization":

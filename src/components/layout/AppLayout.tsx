@@ -6,7 +6,7 @@ import BottomNavigation from "./BottomNavigation";
 import { Loader2 } from "lucide-react";
 
 const AppLayout = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,7 +19,7 @@ const AppLayout = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 
