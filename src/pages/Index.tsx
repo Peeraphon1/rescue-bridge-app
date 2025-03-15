@@ -7,7 +7,7 @@ const Index = () => {
   
   // Redirect to role selection page
   useEffect(() => {
-    navigate("/");
+    navigate("/", { replace: true });
   }, [navigate]);
   
   return null;
