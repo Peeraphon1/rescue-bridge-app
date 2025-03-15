@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserRole } from "@/types/supabase";
@@ -48,20 +47,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           console.warn("Could not refresh profile - no profile found");
         }
-        return refreshedProfile;
       } catch (error) {
         console.error("Error refreshing profile:", error);
         toast.error("Failed to refresh your profile. Please try again.");
-        return null;
       } finally {
         setIsLoading(false);
       }
     }
-    return null;
   }, [user]);
 
   useEffect(() => {
-    // Check for current user on mount
     const checkUser = async () => {
       try {
         setIsLoading(true);
@@ -73,7 +68,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error("Error checking user session:", error);
-        // Don't show toast for auth session missing - it's expected when not logged in
         if (error instanceof Error && !error.message.includes("Auth session missing")) {
           toast.error("Authentication error. Please try logging in again.");
         }
@@ -116,7 +110,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await signUp(email, password, role, name);
       setUser(data.user);
       
-      // Attempt to fetch the profile immediately after signup
       try {
         const userProfile = await fetchProfile(data.user);
         if (!userProfile) {
@@ -154,7 +147,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const verifyOtp = async (otp: string) => {
-    // For demo purposes, we're just checking if the OTP is 4 digits
     return otp.length === 4;
   };
 
