@@ -25,7 +25,7 @@ const DashboardRouter = () => {
     }
   }, [isLoading, profile, user, refreshProfile]);
 
-  // Add a helper function to create profile if missing
+  // Add a helper function to create missing profile
   const createMissingProfile = async () => {
     if (!user) return;
     

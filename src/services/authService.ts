@@ -18,17 +18,30 @@ export const signIn = async (email: string, password: string, role: UserRole) =>
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
       console.error("Error fetching user profile:", profileError);
-      if (profileError.code === "PGRST116") {
-        throw new Error("User profile not found. Please contact support.");
-      }
       throw profileError;
     }
 
-    if (profile.role !== role) {
+    if (!profile) {
+      console.warn("Profile not found. Attempting to create one...");
+      // Create profile if it doesn't exist
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: email,
+          role: role,
+          name: data.user.user_metadata?.name || "User",
+        });
+
+      if (createProfileError) {
+        console.error("Error creating profile:", createProfileError);
+        throw new Error("Failed to create user profile");
+      }
+    } else if (profile.role !== role) {
       await supabase.auth.signOut();
       throw new Error(`This account is not registered as a ${role}. Please use the correct login.`);
     }
@@ -71,8 +84,12 @@ export const signUp = async (email: string, password: string, role: UserRole, na
 
       if (profileError) {
         console.error('Error creating user profile:', profileError);
-        // Even if profile creation fails, we don't want to block the signup
-        // The trigger should handle it, this is just a backup
+        // Check if the error is due to RLS or unique constraint
+        if (profileError.code === '42501') {
+          console.log('Profile creation might be handled by database trigger');
+        } else {
+          throw profileError;
+        }
       }
     }
 
@@ -131,8 +148,26 @@ export const getCurrentUserProfile = async () => {
       throw profileError;
     }
     
+    // If profile doesn't exist, create one
     if (!profile) {
-      throw new Error('Profile not found');
+      const newProfile = {
+        id: userData.user.id,
+        email: userData.user.email,
+        role: userData.user.user_metadata?.role || 'victim',
+        name: userData.user.user_metadata?.name || 'User',
+      };
+      
+      const { data: createdProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert(newProfile)
+        .select('*')
+        .maybeSingle();
+        
+      if (createError) {
+        throw createError;
+      }
+      
+      return createdProfile;
     }
     
     return profile;
