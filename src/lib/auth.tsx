@@ -1,125 +1,109 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, UserRole } from "../types";
+import { useNavigate } from "react-router-dom";
+import { UserRole } from "@/types/supabase";
+import { signIn, signUp, signOut, getCurrentUser, getCurrentUserProfile } from "@/services/authService";
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  register: (email: string, password: string, role: UserRole, name?: string) => Promise<boolean>;
-  logout: () => void;
-  verifyOtp: (otp: string) => Promise<boolean>;
+type AuthContextType = {
+  user: any | null;
+  profile: any | null;
   isLoading: boolean;
-}
+  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  register: (email: string, password: string, role: UserRole, name: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  verifyOtp: (otp: string) => Promise<boolean>;
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock data and functions for demonstration purposes
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<any | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // Check if user is logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('floodRelief_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Check for current user on mount
+    const checkUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        
+        if (currentUser) {
+          const userProfile = await getCurrentUserProfile();
+          setProfile(userProfile);
+        }
+      } catch (error) {
+        console.error("Error checking user session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUser();
   }, []);
 
-  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+  const login = async (email: string, password: string, role: UserRole) => {
     setIsLoading(true);
-    
-    // Mock API call
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful login
-      const mockUser: User = {
-        id: '123456',
-        email,
-        role,
-        name: role === 'admin' ? 'Admin User' : 
-              role === 'organization' ? 'Relief Organization' : 
-              role === 'rescuer' ? 'Rescue Volunteer' : 'Flood Victim'
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('floodRelief_user', JSON.stringify(mockUser));
-      setIsLoading(false);
+      const data = await signIn(email, password, role);
+      setUser(data.user);
+      const userProfile = await getCurrentUserProfile();
+      setProfile(userProfile);
       return true;
     } catch (error) {
-      console.error('Login failed', error);
-      setIsLoading(false);
+      console.error("Login error:", error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const register = async (email: string, password: string, role: UserRole, name?: string): Promise<boolean> => {
+  const register = async (email: string, password: string, role: UserRole, name: string) => {
     setIsLoading(true);
-    
-    // Mock API call
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful registration
-      if (role === 'organization') {
-        // Organization registration is handled differently, just return true
-        setIsLoading(false);
-        return true;
-      }
-      
-      const mockUser: User = {
-        id: '123456',
-        email,
-        role,
-        name: name || 'New User'
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('floodRelief_user', JSON.stringify(mockUser));
-      setIsLoading(false);
+      const data = await signUp(email, password, role, name);
+      setUser(data.user);
       return true;
     } catch (error) {
-      console.error('Registration failed', error);
-      setIsLoading(false);
+      console.error("Registration error:", error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('floodRelief_user');
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await signOut();
+      setUser(null);
+      setProfile(null);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const verifyOtp = async (otp: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Mock OTP verification
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsLoading(false);
-      return true;
-    } catch (error) {
-      console.error('OTP verification failed', error);
-      setIsLoading(false);
-      return false;
-    }
+  const verifyOtp = async (otp: string) => {
+    // For demo purposes, we're just checking if the OTP is 4 digits
+    return otp.length === 4;
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      login, 
-      register, 
-      logout, 
-      verifyOtp, 
-      isLoading 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        isLoading,
+        login,
+        register,
+        logout,
+        verifyOtp,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -128,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

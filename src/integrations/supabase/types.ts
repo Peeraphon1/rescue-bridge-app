@@ -9,7 +9,390 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      help_requests: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          location_address: string
+          location_lat: number
+          location_lng: number
+          needs_food: boolean | null
+          needs_medicine: boolean | null
+          needs_other: boolean | null
+          needs_water: boolean | null
+          other_details: string | null
+          people_count: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          location_address: string
+          location_lat: number
+          location_lng: number
+          needs_food?: boolean | null
+          needs_medicine?: boolean | null
+          needs_other?: boolean | null
+          needs_water?: boolean | null
+          other_details?: string | null
+          people_count: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          location_address?: string
+          location_lat?: number
+          location_lng?: number
+          needs_food?: boolean | null
+          needs_medicine?: boolean | null
+          needs_other?: boolean | null
+          needs_water?: boolean | null
+          other_details?: string | null
+          people_count?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_requests: {
+        Row: {
+          created_at: string
+          id: string
+          mission_id: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mission_id: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mission_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_requests_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_requests_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "help_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_status_updates: {
+        Row: {
+          id: string
+          mission_id: string
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          mission_id: string
+          status: string
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          mission_id?: string
+          status?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_status_updates_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          created_at: string
+          end_time: string | null
+          id: string
+          start_time: string | null
+          status: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          start_time?: string | null
+          status?: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          start_time?: string | null
+          status?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_documents: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          address: string
+          created_at: string
+          email: string
+          id: string
+          is_verified: boolean | null
+          name: string
+          phone: string
+          rejection_reason: string | null
+          representative_name: string
+          representative_position: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          email: string
+          id?: string
+          is_verified?: boolean | null
+          name: string
+          phone: string
+          rejection_reason?: string | null
+          representative_name: string
+          representative_position: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_verified?: boolean | null
+          name?: string
+          phone?: string
+          rejection_reason?: string | null
+          representative_name?: string
+          representative_position?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          organization: string | null
+          phone: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string | null
+          organization?: string | null
+          phone?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          organization?: string | null
+          phone?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
+      request_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          request_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          request_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_images_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "help_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_leader: boolean | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_leader?: boolean | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_leader?: boolean | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          leader_id: string | null
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          leader_id?: string | null
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          leader_id?: string | null
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
